@@ -1,0 +1,109 @@
+-- Les 10 pays ayant le plus haut ratio disponibilité alimentaire/habitant en terme de protéines (en kg) par habitant, puis en terme de kcal par habitant.
+
+SELECT 
+p.pays,
+p.annee,
+p.population_en_milliers,
+
+sum(d.dispo_alim_kcal_p_j) AS dispo_alim_kcal_totale,
+sum(d.dispo_prot_g_p_j*1000) AS dispo_prot_kg_totale
+
+
+
+FROM
+population p,
+dispo_alim d
+
+WHERE
+p.pays = d.pays
+AND p.annee = d.annee
+AND p.code_pays = d.code_pays
+AND p.annee = 2013
+
+GROUP BY 
+p.pays
+
+ORDER BY dispo_alim_kcal_totale DESC,dispo_prot_kg_totale DESC
+
+LIMIT 10;
+
+-- Les 10 pays ayant le plus faible ratio disponibilité alimentaire/habitant en terme de protéines (en kg) par habitant, puis en terme de kcal par habitant.
+
+SELECT 
+p.pays,
+p.annee,
+p.population_en_milliers,
+
+sum(d.dispo_alim_kcal_p_j) AS dispo_alim_kcal_totale,
+sum(d.dispo_prot_g_p_j*1000) AS dispo_prot_kg_totale
+
+
+
+FROM
+population p,
+dispo_alim d
+
+WHERE
+p.pays = d.pays
+AND p.annee = d.annee
+AND p.code_pays = d.code_pays
+AND p.annee = 2013
+
+GROUP BY 
+p.pays
+
+ORDER BY dispo_alim_kcal_totale ASC,dispo_prot_kg_totale ASC
+
+LIMIT 10;
+
+-- Les 10 pays pour lesquels la proportion de personnes sous-alimentées est la plus forte.
+
+SELECT 
+p.pays,
+p.annee,
+sn.annee,
+p.population_en_milliers*1000 AS pop,
+sn.nb_personne_millions*1000000 AS pers_ss_alim,
+((sn.nb_personne_millions*1000000) / (p.population_en_milliers*1000))*100 AS prop_ss_alim_pourcentage
+
+FROM
+population p,
+sous_nutrition sn
+
+WHERE 
+p.annee = 2013
+AND sn.annee = '2011-2013'
+AND p.pays = sn.pays
+
+ORDER BY prop_ss_alim_pourcentage DESC
+
+LIMIT 10;
+
+
+
+-- Les 10 produits pour lesquels le ratio Autres utilisations/Disponibilité intérieure est le plus élevé.
+
+SELECT 
+
+e.annee,
+e.code_produit,
+e.produit,
+sum(e.autres_utilisations_milliers_tonnes),
+sum(e.dispo_int_milliers_tonnes),
+
+ 
+(CAST 
+(sum(e.autres_utilisations_milliers_tonnes) as FLOAT)/CAST(sum(e.dispo_int_milliers_tonnes) as FLOAT)) *100 AS ratio
+
+FROM equilibre_prod e
+
+WHERE
+e.annee = 2013
+
+GROUP BY
+e.code_produit
+
+ORDER BY ratio DESC
+
+LIMIT 10;
+
